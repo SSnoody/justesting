@@ -1,0 +1,29 @@
+FROM alpine:3.12
+
+# PHP + herramientas necesarias
+RUN apk add --no-cache \
+    php7 \
+    php7-fpm \
+    php7-mysqlnd \
+    wget \
+    unzip \
+    tar
+
+# Crear directorio para WordPress
+RUN mkdir -p /var/www/wordpress
+
+# WordPress vulnerable (5.4.2) - OJO: sin corchetes ni paréntesis estilo Markdown
+RUN wget https://wordpress.org/wordpress-5.4.2.tar.gz -O /tmp/wp.tar.gz && \
+    tar -xzf /tmp/wp.tar.gz -C /var/www/wordpress --strip-components=1 && \
+    rm /tmp/wp.tar.gz
+
+# Plugin vulnerable Contact Form 7
+RUN cd /var/www/wordpress/wp-content/plugins && \
+    wget https://downloads.wordpress.org/plugin/contact-form-7.5.6.zip -O cf7.zip && \
+    unzip cf7.zip && rm cf7.zip
+
+# Secret expuesto para que Trivy lo detecte
+RUN echo "<?php // AWS_ACCESS_KEY_ID_FOR_DEMO=AKIAIOSFODNN7EXAMPLE" > /var/www/wordpress/wp-config-secrets.php
+
+WORKDIR /var/www/wordpress
+CMD ["php-fpm7", "-F"]

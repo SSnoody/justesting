@@ -25,7 +25,8 @@ services:
     depends_on:
       - db
     volumes:
-      - wp_data:/var/www/html
+      # NOTA: En nuestra imagen Alpine custom el path es /var/www/wordpress
+      - wp_data:/var/www/wordpress
 
   watchtower:
     image: containrrr/watchtower
